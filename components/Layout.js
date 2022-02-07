@@ -1,5 +1,7 @@
 import Head from 'next/head'
 import styles from '../styles/Layout.module.css'
+import Footer from './Footer'
+import Header from './Header'
 export default function Layout({ title, description, keywords, children }) {
   return (
     <>
@@ -8,7 +10,9 @@ export default function Layout({ title, description, keywords, children }) {
         <meta name='keywords' content={keywords} />
         <title>{title}</title>
       </Head>
+      <Header />
       <div className={styles.container}>{children}</div>
+      <Footer />
     </>
   )
 }
