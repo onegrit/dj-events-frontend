@@ -6,6 +6,8 @@ import Image from 'next/image'
 import Link from 'next/link'
 
 export default function EventPage({ evt }) {
+  // console.log('EventPage:', evt)
+  const attr = evt.attributes
   const deleteEvent = () => {
     console.log('Delete Event')
   }
@@ -24,22 +26,26 @@ export default function EventPage({ evt }) {
           </a>
         </div>
         <span>
-          {evt.date} at {evt.time}
+          {new Date(attr.date).toLocaleDateString('en-US')} at {attr.time}
         </span>
         <h1>{evt.name}</h1>
-        {evt.image && (
+        {attr.image.data && (
           <div className={styles.image}>
-            <Image src={evt.image} width={960} height={600} />
+            <Image
+              src={attr.image.data.attributes.formats.medium.url}
+              width={960}
+              height={600}
+            />
           </div>
         )}
         <h3>Performers:</h3>
-        <p>{evt.performers}</p>
+        <p>{attr.performers}</p>
         <h3>Description</h3>
-        <p>{evt.description} </p>
-        <h3>Venu: {evt.venue}</h3>
-        <p>{evt.address}</p>
+        <p>{attr.description} </p>
+        <h3>Venu: {attr.venue}</h3>
+        <p>{attr.address}</p>
         <Link href='/events'>
-          <a className={styles.back}>{'<'}Go Back</a>
+          <a className={styles.back}>Go Back</a>
         </Link>
       </div>
     </Layout>
@@ -47,9 +53,12 @@ export default function EventPage({ evt }) {
 }
 // SSG:Static Site Generation
 export async function getStaticProps({ params: { slug } }) {
-  const res = await fetch(`${API_URL}/api/events/{slug}`)
-  const events = await res.json()
-
+  const res = await fetch(
+    `${API_URL}/api/events?[populate]=*&filters[slug][$eq]=${slug}`
+  )
+  const ret = await res.json()
+  const events = ret.data
+  console.log('getStaticProps: ', events)
   return {
     props: {
       evt: events[0],
@@ -59,14 +68,18 @@ export async function getStaticProps({ params: { slug } }) {
 }
 
 export async function getStaticPaths() {
-  const res = await fetch(`${API_URL}/api/events`)
-  const events = await res.json()
+  const res = await fetch(`${API_URL}/api/events?[populate]=*&sort[0]=date:asc`)
+  const ret = await res.json()
+  const events = ret.data
   // 构造paths数据结构
   const paths = events.map((evt) => {
-    params: {
-      slug: evt.slug
+    return {
+      params: {
+        slug: evt.attributes.slug,
+      },
     }
   })
+  console.log('getStaticPaths: ', paths)
   return {
     paths,
     fallback: true,
