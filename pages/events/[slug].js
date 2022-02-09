@@ -9,7 +9,7 @@ import 'react-toastify/dist/ReactToastify.css'
 import { useRouter } from 'next/router'
 
 export default function EventPage({ evt }) {
-  console.log('EventPage:', evt)
+  // console.log('EventPage:', evt)
   const attr = evt.attributes
   const router = useRouter()
 
