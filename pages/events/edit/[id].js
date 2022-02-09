@@ -1,3 +1,4 @@
+import { FaImage } from 'react-icons/fa'
 import { useState } from 'react'
 import { useRouter } from 'next/router'
 import Link from 'next/link'
@@ -8,6 +9,7 @@ import { ToastContainer, toast } from 'react-toastify'
 // import moment from 'moment'
 import { formatDateForInput } from '@/utils/formatDate'
 import 'react-toastify/dist/ReactToastify.css'
+import Image from 'next/image'
 
 export default function EditEventPage({ evt }) {
   const attr = evt.attributes
@@ -21,6 +23,9 @@ export default function EditEventPage({ evt }) {
     time: attr.time,
     description: attr.description,
   })
+  const [imagePreview, setImagePreview] = useState(
+    attr.image.data ? attr.image.data.attributes.formats.thumbnail.url : null
+  )
 
   //TODO: 窗体数据验证
 
@@ -146,12 +151,28 @@ export default function EditEventPage({ evt }) {
         </div>
         <input type='submit' value='Update Event' className='btn' />
       </form>
+
+      <h2>Event Image</h2>
+      {imagePreview ? (
+        <Image src={imagePreview} height={100} width={170} />
+      ) : (
+        <div>
+          <p>No image uploaded</p>
+        </div>
+      )}
+      <div>
+        <button className='btn-secondary'>
+          <FaImage /> Set Image
+        </button>
+      </div>
     </Layout>
   )
 }
 
 export async function getServerSideProps({ params: { id } }) {
-  const res = await fetch(`${API_URL}/api/events/${id}`, { method: 'GET' })
+  const res = await fetch(`${API_URL}/api/events/${id}?[populate]=*`, {
+    method: 'GET',
+  })
   //TODO:判断是否成功返回数据
   const ret = await res.json()
   // console.log('EditEvent: ', ret.data)
