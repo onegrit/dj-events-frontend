@@ -4,12 +4,34 @@ import Layout from '@/components/Layout'
 import styles from '@/styles/Event.module.css'
 import Image from 'next/image'
 import Link from 'next/link'
+import { ToastContainer, toast } from 'react-toastify'
+import 'react-toastify/dist/ReactToastify.css'
+import { useRouter } from 'next/router'
 
 export default function EventPage({ evt }) {
-  // console.log('EventPage:', evt)
+  console.log('EventPage:', evt)
   const attr = evt.attributes
-  const deleteEvent = () => {
-    console.log('Delete Event')
+  const router = useRouter()
+
+  const deleteEvent = async (e) => {
+    // console.log('DeleteEvent: ', evt)
+    if (confirm('Are you sure?')) {
+      const res = await fetch(`${API_URL}/api/events/${evt.id}`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      })
+
+      const data = await res.json()
+
+      if (!res.ok) {
+        toast.error(data.message)
+      } else {
+        toast.info(`Event with id ${evt.id} has been deleted successfully.`)
+        router.push('/events')
+      }
+    }
   }
 
   return (
@@ -29,6 +51,9 @@ export default function EventPage({ evt }) {
           {new Date(attr.date).toLocaleDateString('en-US')} at {attr.time}
         </span>
         <h1>{evt.name}</h1>
+
+        <ToastContainer />
+
         {attr.image.data && (
           <div className={styles.image}>
             <Image
@@ -58,7 +83,7 @@ export async function getStaticProps({ params: { slug } }) {
   )
   const ret = await res.json()
   const events = ret.data
-  console.log('getStaticProps: ', events)
+  // console.log('getStaticProps: ', events)
   return {
     props: {
       evt: events[0],
@@ -79,7 +104,7 @@ export async function getStaticPaths() {
       },
     }
   })
-  console.log('getStaticPaths: ', paths)
+  // console.log('getStaticPaths: ', paths)
   return {
     paths,
     fallback: true,

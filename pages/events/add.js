@@ -33,21 +33,25 @@ export default function AddEventPage() {
     if (hasEmptyFields) {
       toast.error('Please fill in all fields.')
     }
+
+    //构造strapi数据
+    const data = { data: { ...values } }
     // 提交数据
     const res = await fetch(`${API_URL}/api/events`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify(values),
+      body: JSON.stringify(data),
     })
     // 是否成功提交
     if (!res.ok) {
       toast.error('Something went wrong.')
     } else {
       // 提交成功后跳转到浏览页面
-      const evt = await res.json()
-      router.push(`/events/${evt.slug}`)
+      const ret = await res.json()
+      // console.log(ret.data.attributes.slug)
+      router.push(`/events/${ret.data.attributes.slug}`)
     }
   }
 
